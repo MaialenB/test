@@ -18,13 +18,18 @@ import users.Usuario;
 
 public class Servicios {
 
+	// lista de usuarios creados, atributos de la clase Servicio
 	
 	public static List<Usuario> usuarios = new ArrayList<Usuario>();
-	//public HttpServletRequest httpReq = (HttpServletRequest) request;
 
+	// constructor
+	
 	public Servicios( List<Usuario> usuarios) {
 		this.usuarios = usuarios;
 	}
+	
+	
+	// getters y setters
 	
 	public static List<Usuario> getUsuarios() {
 		return usuarios;
@@ -45,16 +50,28 @@ public class Servicios {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response create(@Context HttpHeaders httpHeaders, Usuario usuario) {
+			
+			// se recogen los headers que necesitamos
 		
 			String header = httpHeaders.getRequestHeader("X-WEB-KEY").get(0);
+			
+			// si el header anterior cumple los requisitos, se creará un usuario con los datos y se 
+			// devolverá un código 201
+			
 			if (header == "Test2021") {
 				usuarios.add(usuario);
 				return Response.status(201).entity(usuario).build();
 			}
+			
+			// si no se cumplen los requisitos, se devolverá un código 400
+			
 			return Response.status(400).build();
 		
 	}
 	
+	/*
+	 * End-point encargado de checkear que existe un usuario / cliente con el token único.
+	 */
 	
 	@GET
 	@Path("/check")
@@ -62,8 +79,14 @@ public class Servicios {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response check(@Context HttpHeaders httpHeaders) {
 		try {
+			
+			// se recogen los headers que necesitamos
+			
 			String header_key = httpHeaders.getRequestHeader("X-WEB-KEY").get(0);
 			String header_token = httpHeaders.getRequestHeader("X-DS-TOKEN").get(0);
+			
+			// se comprueba si son correctos y si es así se crea un código 200
+			
 			if (header_key == "Test2021") {
 				for (Usuario user: usuarios) {
 					if (user.getToken().equals(header_token)){
@@ -71,36 +94,20 @@ public class Servicios {
 					}	
 				}	
 			}
-
+			
+			// si no son correctos los headers se devuelve un código 401
+			
+			return Response.status(401).build();
+			
+			
+			// si ha habido algún error y el código ha fallado y no ha podido terminar de ejecutar el try,
+			// se devuelve un código 401
+			
 		}finally {
-			throw new WebApplicationException(401);
+			return Response.status(401).build();
 		}
 	
 	}
-	
-	/*
-	@PostMapping("/register")
-	public ResponseEntity<Usuario> registerUser(@RequestBody Usuario user) {
-	    //log.info("Request to create student: {}", user);
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		String url = "https://{url}/register";
-		HttpPost httpPost = new HttpPost(url);
-
-		httpPost.addHeader("X-WEB-KEY" , "Test2021");
-
-		HttpResponse response = httpclient.execute(httpPost);
-		
-		
-	    Usuario newUser = usuarios.add(user);
-	    return new ResponseEntity<>(user.token, HttpStatus.CREATED);
-	}
-	
-	@GetMapping("/check")
-	public ResponseEntity<> checkToken(@){
-		return ResponseEntity<Success>();
-	}*/
-	
-	
 	
 	
 }
